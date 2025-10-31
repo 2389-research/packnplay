@@ -49,12 +49,14 @@ func sanitizeBranchName(name string) string {
 // IsGitRepo checks if a directory is a git repository
 func IsGitRepo(path string) bool {
 	cmd := exec.Command("git", "-C", path, "rev-parse", "--git-dir")
+	cmd.Stdin = nil
 	return cmd.Run() == nil
 }
 
 // GetCurrentBranch returns the current branch name
 func GetCurrentBranch(path string) (string, error) {
 	cmd := exec.Command("git", "-C", path, "branch", "--show-current")
+	cmd.Stdin = nil
 	output, err := cmd.Output()
 	if err != nil {
 		return "", err
@@ -65,6 +67,7 @@ func GetCurrentBranch(path string) (string, error) {
 // WorktreeExists checks if a worktree with the given name exists
 func WorktreeExists(worktreeName string) (bool, error) {
 	cmd := exec.Command("git", "worktree", "list", "--porcelain")
+	cmd.Stdin = nil
 	output, err := cmd.Output()
 	if err != nil {
 		return false, err
@@ -86,6 +89,7 @@ func WorktreeExists(worktreeName string) (bool, error) {
 // GetWorktreePath gets the actual path of an existing worktree
 func GetWorktreePath(worktreeName string) (string, error) {
 	cmd := exec.Command("git", "worktree", "list", "--porcelain")
+	cmd.Stdin = nil
 	output, err := cmd.Output()
 	if err != nil {
 		return "", err
@@ -116,18 +120,21 @@ func GetWorktreePath(worktreeName string) (string, error) {
 func CreateWorktree(path, branchName string, verbose bool) error {
 	// Check if branch already exists
 	checkCmd := exec.Command("git", "show-ref", "--verify", "--quiet", fmt.Sprintf("refs/heads/%s", branchName))
+	checkCmd.Stdin = nil
 	branchExists := checkCmd.Run() == nil
 
 	var cmd *exec.Cmd
 	if branchExists {
 		// Branch exists, check it out in the worktree
 		cmd = exec.Command("git", "worktree", "add", path, branchName)
+		cmd.Stdin = nil
 		if verbose {
 			fmt.Fprintf(os.Stderr, "+ git worktree add %s %s\n", path, branchName)
 		}
 	} else {
 		// Branch doesn't exist, create it
 		cmd = exec.Command("git", "worktree", "add", path, "-b", branchName)
+		cmd.Stdin = nil
 		if verbose {
 			fmt.Fprintf(os.Stderr, "+ git worktree add %s -b %s\n", path, branchName)
 		}
