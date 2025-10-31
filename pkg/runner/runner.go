@@ -232,7 +232,7 @@ To stop the existing container:
 	if isApple {
 		args = []string{"run", "-d"}
 	} else {
-		args = []string{"run", "-d", "-it"} // -d for detached, keep -it for interactive
+		args = []string{"run", "-d"} // -d for detached, keep -it for interactive
 	}
 
 	// Add labels
