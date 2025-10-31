@@ -75,6 +75,7 @@ func (c *Client) Run(args ...string) (string, error) {
 	}
 
 	cmd := exec.Command(c.cmd, args...)
+	cmd.Stdin = nil // Detach stdin to prevent "input device is not a TTY" errors
 
 	if c.verbose {
 		fmt.Fprintf(os.Stderr, "+ %s %v\n", c.cmd, args)
