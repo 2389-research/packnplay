@@ -91,7 +91,7 @@ func DetectContainerUser(image string, devcontainer *DevcontainerConfig) (*UserD
 func DetectUsersInImage(image string) ([]UserInfo, error) {
 	// Run container briefly to examine /etc/passwd
 	cmd := exec.Command("docker", "run", "--rm", image, "cat", "/etc/passwd")
-	cmd.Stdin = nil
+	cmd.Stdin = strings.NewReader("")
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to examine users in image %s: %w", image, err)
@@ -121,7 +121,7 @@ func DetectUsersInImage(image string) ([]UserInfo, error) {
 // GetImageDefaultUser gets the default user from Docker image config
 func GetImageDefaultUser(image string) (string, error) {
 	cmd := exec.Command("docker", "image", "inspect", image, "--format", "{{.Config.User}}")
-	cmd.Stdin = nil
+	cmd.Stdin = strings.NewReader("")
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to inspect image %s: %w", image, err)
@@ -139,7 +139,7 @@ func GetImageDefaultUser(image string) (string, error) {
 func detectRuntimeUserDirect(image string) (*UserDetectionResult, error) {
 	// Run container and ask it directly who it is and where home is
 	cmd := exec.Command("docker", "run", "--rm", image, "sh", "-c", "whoami && echo $HOME")
-	cmd.Stdin = nil
+	cmd.Stdin = strings.NewReader("")
 	output, err := cmd.Output()
 	if err != nil {
 		return nil, fmt.Errorf("failed to detect user in image %s: %w", image, err)
@@ -167,7 +167,7 @@ func detectRuntimeUserDirect(image string) (*UserDetectionResult, error) {
 // getImageID gets the image ID for caching purposes
 func getImageID(image string) (string, error) {
 	cmd := exec.Command("docker", "image", "inspect", image, "--format", "{{.Id}}")
-	cmd.Stdin = nil
+	cmd.Stdin = strings.NewReader("")
 	output, err := cmd.Output()
 	if err != nil {
 		return "", fmt.Errorf("failed to get image ID for %s: %w", image, err)
