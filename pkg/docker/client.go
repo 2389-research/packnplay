@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 )
 
 // Client handles Docker CLI interactions
@@ -76,7 +77,15 @@ func (c *Client) Run(args ...string) (string, error) {
 	}
 
 	cmd := exec.Command(c.cmd, args...)
-	cmd.Stdin = strings.NewReader("") // Explicit empty stdin to prevent "input device is not a TTY" errors
+	// Open /dev/null and assign to stdin to ensure no TTY is attached
+	if devNull, err := os.Open(os.DevNull); err == nil {
+		cmd.Stdin = devNull
+		defer devNull.Close()
+	}
+	// Detach from controlling terminal by starting new process group
+	cmd.SysProcAttr = &syscall.SysProcAttr{
+		Setpgid: true,
+	}
 
 	if c.verbose {
 		fmt.Fprintf(os.Stderr, "+ %s %v\n", c.cmd, args)
